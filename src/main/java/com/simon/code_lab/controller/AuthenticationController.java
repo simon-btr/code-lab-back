@@ -1,14 +1,19 @@
 package com.simon.code_lab.controller;
 
+import java.util.Map;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.simon.code_lab.dto.EmailDto;
 import com.simon.code_lab.dto.LoginUserDto;
 import com.simon.code_lab.dto.RegisterUserDto;
 import com.simon.code_lab.dto.VerifiyUserDto;
+import com.simon.code_lab.exception.UserNotEnabledException;
 import com.simon.code_lab.model.User;
 import com.simon.code_lab.response.LoginResponse;
 import com.simon.code_lab.service.AuthenticationService;
@@ -33,12 +38,18 @@ public class AuthenticationController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> authenticate(@RequestBody LoginUserDto loginUserDto) {
-        User user = authenticationService.authenticate(loginUserDto);
-        String token = jwtService.generateToken(user);
+    public ResponseEntity<?> authenticate(@RequestBody LoginUserDto loginUserDto) {
+        try {
+            User user = authenticationService.authenticate(loginUserDto);
+            String token = jwtService.generateToken(user);
 
-        LoginResponse loginResponse = new LoginResponse(token, jwtService.getExpiration());
-        return ResponseEntity.ok(loginResponse);
+            LoginResponse loginResponse = new LoginResponse(token, jwtService.getExpiration());
+            return ResponseEntity.ok(loginResponse);
+        } catch (UserNotEnabledException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", e.getMessage()));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", e.getMessage()));
+        }
     }
 
     @PostMapping("/verify")
@@ -52,9 +63,9 @@ public class AuthenticationController {
     }
 
     @PostMapping("/resend")
-    public ResponseEntity<?> resendVerificationEmail(@RequestBody String email) {
+    public ResponseEntity<?> resendVerificationEmail(@RequestBody EmailDto emailDto) {
         try {
-            authenticationService.resendVerificationCode(email);
+            authenticationService.resendVerificationCode(emailDto.getEmail());
             return ResponseEntity.ok("Verification email resent successfully");
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());

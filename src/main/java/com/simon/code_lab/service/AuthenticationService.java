@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import com.simon.code_lab.dto.LoginUserDto;
 import com.simon.code_lab.dto.RegisterUserDto;
 import com.simon.code_lab.dto.VerifiyUserDto;
+import com.simon.code_lab.exception.UserNotEnabledException;
 import com.simon.code_lab.model.User;
 import com.simon.code_lab.repository.UserRepository;
 
@@ -42,9 +43,10 @@ public class AuthenticationService {
         user.setVerificationExpiration(LocalDateTime.now().plusMinutes(15));
         user.setEnabled(false);
 
-        sendVerificationEmail(user);
+        userRepository.save(user);
 
-        return userRepository.save(user);
+        sendVerificationEmail(user);
+        return user;
     }
 
     public User authenticate(LoginUserDto loginUserDto) {
@@ -52,7 +54,7 @@ public class AuthenticationService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         if (!user.isEnabled()) {
-            throw new RuntimeException("User account is not enabled");
+            throw new UserNotEnabledException("User account is not enableddd");
         }
 
         authenticationManager.authenticate(
