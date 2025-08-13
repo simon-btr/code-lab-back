@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.simon.code_lab.dto.TodoListDto;
 import com.simon.code_lab.dto.mapper.TodoListMapper;
@@ -41,6 +42,7 @@ public class TodoListService {
         return list;
     }
 
+    @Transactional
     public TodoListDto createTodoList(String title) {
         User owner = getCurrentUserOrThrow();
 
@@ -52,6 +54,7 @@ public class TodoListService {
         return TodoListMapper.toTodoListDto(todoListRepository.save(list));
     }
 
+    @Transactional(readOnly = true)
     public List<TodoListDto> getTodoListsForCurrentUser() {
         User user = getCurrentUserOrThrow();
         return todoListRepository.findByMember(user)
@@ -60,11 +63,13 @@ public class TodoListService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public TodoListDto getTodoListById(Long id) {
         User user = getCurrentUserOrThrow();
         return TodoListMapper.toTodoListDto(getListIfMember(id, user));
     }
 
+    @Transactional
     public TodoListDto addMember(Long listId, String memberEmailToAdd) {
         User requester = getCurrentUserOrThrow();
         TodoList list = todoListRepository.findById(listId)
@@ -85,6 +90,7 @@ public class TodoListService {
         return TodoListMapper.toTodoListDto(todoListRepository.save(list));
     }
 
+    @Transactional
     public TodoListDto removeMember(Long listId, String memberEmailToRemove) {
         User requester = getCurrentUserOrThrow();
         TodoList list = todoListRepository.findById(listId)
@@ -109,6 +115,7 @@ public class TodoListService {
         return TodoListMapper.toTodoListDto(todoListRepository.save(list));
     }
 
+    @Transactional
     public TodoListDto updateTitle(Long listId, String newTitle) {
         User requester = getCurrentUserOrThrow();
         TodoList list = getListIfMember(listId, requester);
@@ -121,6 +128,7 @@ public class TodoListService {
         return TodoListMapper.toTodoListDto(todoListRepository.save(list));
     }
 
+    @Transactional
     public void deleteTodoList(Long listId) {
         User requester = getCurrentUserOrThrow();
         TodoList list = todoListRepository.findById(listId)

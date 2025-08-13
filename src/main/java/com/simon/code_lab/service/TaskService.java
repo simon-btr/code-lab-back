@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.simon.code_lab.dto.TaskDto;
 import com.simon.code_lab.dto.mapper.TodoListMapper;
@@ -40,6 +41,7 @@ public class TaskService {
         }
     }
 
+    @Transactional
     public TaskDto addTask(Long todoListId, String title, String description) {
         User user = getCurrentUserOrThrow();
         TodoList todoList = todoListRepository.findById(todoListId)
@@ -55,6 +57,7 @@ public class TaskService {
         return TodoListMapper.toTaskDto(taskRepository.save(task));
     }
 
+    @Transactional(readOnly = true)
     public List<TaskDto> getTasksForList(Long todoListId) {
         User user = getCurrentUserOrThrow();
         TodoList todoList = todoListRepository.findById(todoListId)
@@ -68,6 +71,7 @@ public class TaskService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     public TaskDto updateTask(Long taskId, String title, String description, boolean completed) {
         User user = getCurrentUserOrThrow();
         Task task = taskRepository.findById(taskId)
@@ -83,6 +87,7 @@ public class TaskService {
         return TodoListMapper.toTaskDto(taskRepository.save(task));
     }
 
+    @Transactional
     public void deleteTask(Long taskId) {
         User user = getCurrentUserOrThrow();
         Task task = taskRepository.findById(taskId)
