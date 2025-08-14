@@ -8,11 +8,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.simon.code_lab.dto.TodoListDto;
+import com.simon.code_lab.dto.request.AddMemberRequest;
+import com.simon.code_lab.dto.request.CreateTodoListRequest;
+import com.simon.code_lab.dto.request.UpdateTodoListTitleRequest;
 import com.simon.code_lab.service.TodoListService;
 
 import lombok.RequiredArgsConstructor;
@@ -24,8 +27,8 @@ public class TodoListController {
     private final TodoListService todoListService;
 
     @PostMapping
-    public ResponseEntity<TodoListDto> createTodoList(@RequestParam String title) {
-        return ResponseEntity.ok(todoListService.createTodoList(title));
+    public ResponseEntity<TodoListDto> createTodoList(@RequestBody CreateTodoListRequest request) {
+        return ResponseEntity.ok(todoListService.createTodoList(request.getTitle()));
     }
 
     @GetMapping
@@ -41,8 +44,8 @@ public class TodoListController {
     @PostMapping("/{id}/members")
     public ResponseEntity<TodoListDto> addMember(
             @PathVariable Long id,
-            @RequestParam String memberEmail) {
-        return ResponseEntity.ok(todoListService.addMember(id, memberEmail));
+            @RequestBody AddMemberRequest request) {
+        return ResponseEntity.ok(todoListService.addMember(id, request.getMemberEmail()));
     }
 
     @DeleteMapping("/{id}/members/{memberEmail}")
@@ -51,12 +54,12 @@ public class TodoListController {
             @PathVariable String memberEmail) {
         return ResponseEntity.ok(todoListService.removeMember(id, memberEmail));
     }
-    
+
     @PutMapping("/{id}/title")
     public ResponseEntity<TodoListDto> updateTitle(
             @PathVariable Long id,
-            @RequestParam String title) {
-        return ResponseEntity.ok(todoListService.updateTitle(id, title));
+            @RequestBody UpdateTodoListTitleRequest request) {
+        return ResponseEntity.ok(todoListService.updateTitle(id, request.getTitle()));
     }
 
     @DeleteMapping("/{id}")
