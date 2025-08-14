@@ -23,6 +23,7 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import com.simon.code_lab.dto.TodoListDto;
 import com.simon.code_lab.exception.AccessDeniedException;
@@ -53,14 +54,17 @@ class TodoListServiceTest {
     void setUp() {
         user = new User();
         user.setId(1L);
+        user.setUsername("username");
         user.setEmail("test@example.com");
 
         newMember = new User();
         newMember.setId(2L);
+        newMember.setUsername("newMember");
         newMember.setEmail("newmember@example.com");
 
         notOwner = new User();
         notOwner.setId(3L);
+        notOwner.setUsername("notOwner");
         notOwner.setEmail("notowner@example.com");
 
         list1 = new TodoList();
@@ -80,8 +84,8 @@ class TodoListServiceTest {
     @Test
     void createTodoList_shouldCreateListWithCurrentUserAsOwnerAndMember() {
         try (MockedStatic<SecurityUtil> utilities = Mockito.mockStatic(SecurityUtil.class)) {
-            utilities.when(SecurityUtil::getAuthenticatedEmail).thenReturn(user.getEmail());
-            when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
+            utilities.when(SecurityUtil::getAuthenticatedUsername).thenReturn(user.getUsername());
+            when(userRepository.findByUsername(user.getUsername())).thenReturn(Optional.of(user));
 
             ArgumentCaptor<TodoList> todoListCaptor = ArgumentCaptor.forClass(TodoList.class);
             when(todoListRepository.save(todoListCaptor.capture())).thenAnswer(invocation -> invocation.getArgument(0));
@@ -104,10 +108,10 @@ class TodoListServiceTest {
     @Test
     void createTodoList_shouldThrowUserNotFoundException_whenUserNotFound() {
         try (MockedStatic<SecurityUtil> utilities = Mockito.mockStatic(SecurityUtil.class)) {
-            utilities.when(SecurityUtil::getAuthenticatedEmail).thenReturn("unknown@example.com");
-            when(userRepository.findByEmail("unknown@example.com")).thenReturn(Optional.empty());
+            utilities.when(SecurityUtil::getAuthenticatedUsername).thenReturn("unknown");
+            when(userRepository.findByUsername("unknown")).thenReturn(Optional.empty());
 
-            assertThrows(UserNotFoundException.class, () -> todoListService.createTodoList("Titre"));
+            assertThrows(UsernameNotFoundException.class, () -> todoListService.createTodoList("Titre"));
             verify(todoListRepository, never()).save(any());
         }
     }
@@ -115,8 +119,8 @@ class TodoListServiceTest {
     @Test
     void getTodoListsForCurrentUser_shouldReturnTodoListsForUser() {
         try (MockedStatic<SecurityUtil> utilities = Mockito.mockStatic(SecurityUtil.class)) {
-            utilities.when(SecurityUtil::getAuthenticatedEmail).thenReturn(user.getEmail());
-            when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
+            utilities.when(SecurityUtil::getAuthenticatedUsername).thenReturn(user.getUsername());
+            when(userRepository.findByUsername(user.getUsername())).thenReturn(Optional.of(user));
 
             List<TodoList> lists = List.of(list1, list2);
             when(todoListRepository.findByMember(user)).thenReturn(lists);
@@ -134,10 +138,10 @@ class TodoListServiceTest {
     @Test
     void getTodoListsForCurrentUser_shouldThrowUserNotFoundException_whenUserNotFound() {
         try (MockedStatic<SecurityUtil> utilities = Mockito.mockStatic(SecurityUtil.class)) {
-            utilities.when(SecurityUtil::getAuthenticatedEmail).thenReturn("unknown@example.com");
-            when(userRepository.findByEmail("unknown@example.com")).thenReturn(Optional.empty());
+            utilities.when(SecurityUtil::getAuthenticatedUsername).thenReturn("unknown");
+            when(userRepository.findByUsername("unknown")).thenReturn(Optional.empty());
 
-            assertThrows(UserNotFoundException.class, () -> todoListService.getTodoListsForCurrentUser());
+            assertThrows(UsernameNotFoundException.class, () -> todoListService.getTodoListsForCurrentUser());
             verify(todoListRepository, never()).findByMember(any());
         }
     }
@@ -145,8 +149,8 @@ class TodoListServiceTest {
     @Test
     void getTodoListById_shouldReturnTodoListDto_whenUserIsMember() {
         try (MockedStatic<SecurityUtil> utilities = Mockito.mockStatic(SecurityUtil.class)) {
-            utilities.when(SecurityUtil::getAuthenticatedEmail).thenReturn(user.getEmail());
-            when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
+            utilities.when(SecurityUtil::getAuthenticatedUsername).thenReturn(user.getUsername());
+            when(userRepository.findByUsername(user.getUsername())).thenReturn(Optional.of(user));
             when(todoListRepository.findById(list1.getId())).thenReturn(Optional.of(list1));
 
             TodoListDto result = todoListService.getTodoListById(list1.getId());
@@ -160,8 +164,8 @@ class TodoListServiceTest {
     @Test
     void getTodoListById_shouldThrowTodoListNotFoundException_whenListNotFound() {
         try (MockedStatic<SecurityUtil> utilities = Mockito.mockStatic(SecurityUtil.class)) {
-            utilities.when(SecurityUtil::getAuthenticatedEmail).thenReturn(user.getEmail());
-            when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
+            utilities.when(SecurityUtil::getAuthenticatedUsername).thenReturn(user.getUsername());
+            when(userRepository.findByUsername(user.getUsername())).thenReturn(Optional.of(user));
             when(todoListRepository.findById(list1.getId())).thenReturn(Optional.empty());
 
             assertThrows(TodoListNotFoundException.class, () -> todoListService.getTodoListById(list1.getId()));
@@ -172,6 +176,7 @@ class TodoListServiceTest {
     void getTodoListById_shouldThrowAccessDeniedException_whenUserIsNotMember() {
         User otherUser = new User();
         otherUser.setId(2L);
+        otherUser.setUsername("otherUser");
         otherUser.setEmail("other@example.com");
 
         TodoList listWithoutUser = new TodoList();
@@ -181,8 +186,8 @@ class TodoListServiceTest {
         listWithoutUser.getMembers().add(otherUser);
 
         try (MockedStatic<SecurityUtil> utilities = Mockito.mockStatic(SecurityUtil.class)) {
-            utilities.when(SecurityUtil::getAuthenticatedEmail).thenReturn(user.getEmail());
-            when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
+            utilities.when(SecurityUtil::getAuthenticatedUsername).thenReturn(user.getUsername());
+            when(userRepository.findByUsername(user.getUsername())).thenReturn(Optional.of(user));
             when(todoListRepository.findById(list1.getId())).thenReturn(Optional.of(listWithoutUser));
 
             assertThrows(AccessDeniedException.class, () -> todoListService.getTodoListById(list1.getId()));
@@ -192,9 +197,9 @@ class TodoListServiceTest {
     @Test
     void addMember_shouldAddNewMember_whenRequesterIsOwnerAndMemberNotPresent() {
         try (MockedStatic<SecurityUtil> utilities = Mockito.mockStatic(SecurityUtil.class)) {
-            utilities.when(SecurityUtil::getAuthenticatedEmail).thenReturn(user.getEmail());
+            utilities.when(SecurityUtil::getAuthenticatedUsername).thenReturn(user.getUsername());
 
-            when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
+            when(userRepository.findByUsername(user.getUsername())).thenReturn(Optional.of(user));
             when(todoListRepository.findById(list1.getId())).thenReturn(Optional.of(list1));
             when(userRepository.findByEmail(newMember.getEmail())).thenReturn(Optional.of(newMember));
             when(todoListRepository.save(any(TodoList.class))).thenAnswer(i -> i.getArguments()[0]);
@@ -210,9 +215,9 @@ class TodoListServiceTest {
     @Test
     void addMember_shouldThrowAccessDeniedException_whenRequesterIsNotOwner() {
         try (MockedStatic<SecurityUtil> utilities = Mockito.mockStatic(SecurityUtil.class)) {
-            utilities.when(SecurityUtil::getAuthenticatedEmail).thenReturn(notOwner.getEmail());
+            utilities.when(SecurityUtil::getAuthenticatedUsername).thenReturn(notOwner.getUsername());
 
-            when(userRepository.findByEmail(notOwner.getEmail())).thenReturn(Optional.of(notOwner));
+            when(userRepository.findByUsername(notOwner.getUsername())).thenReturn(Optional.of(notOwner));
             when(todoListRepository.findById(list1.getId())).thenReturn(Optional.of(list1));
 
             AccessDeniedException exception = assertThrows(AccessDeniedException.class,
@@ -225,9 +230,9 @@ class TodoListServiceTest {
     @Test
     void addMember_shouldThrowUserNotFoundException_whenNewMemberNotFound() {
         try (MockedStatic<SecurityUtil> utilities = Mockito.mockStatic(SecurityUtil.class)) {
-            utilities.when(SecurityUtil::getAuthenticatedEmail).thenReturn(user.getEmail());
+            utilities.when(SecurityUtil::getAuthenticatedUsername).thenReturn(user.getUsername());
 
-            when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
+            when(userRepository.findByUsername(user.getUsername())).thenReturn(Optional.of(user));
             when(todoListRepository.findById(list1.getId())).thenReturn(Optional.of(list1));
             when(userRepository.findByEmail(newMember.getEmail())).thenReturn(Optional.empty());
 
@@ -241,9 +246,9 @@ class TodoListServiceTest {
         list1.getMembers().add(newMember);
 
         try (MockedStatic<SecurityUtil> utilities = Mockito.mockStatic(SecurityUtil.class)) {
-            utilities.when(SecurityUtil::getAuthenticatedEmail).thenReturn(user.getEmail());
+            utilities.when(SecurityUtil::getAuthenticatedUsername).thenReturn(user.getUsername());
 
-            when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
+            when(userRepository.findByUsername(user.getUsername())).thenReturn(Optional.of(user));
             when(todoListRepository.findById(list1.getId())).thenReturn(Optional.of(list1));
             when(userRepository.findByEmail(newMember.getEmail())).thenReturn(Optional.of(newMember));
 
@@ -257,9 +262,9 @@ class TodoListServiceTest {
     @Test
     void removeMember_shouldRemoveMember_whenRequesterIsOwnerAndMemberIsPresent() {
         try (MockedStatic<SecurityUtil> utilities = Mockito.mockStatic(SecurityUtil.class)) {
-            utilities.when(SecurityUtil::getAuthenticatedEmail).thenReturn(user.getEmail());
+            utilities.when(SecurityUtil::getAuthenticatedUsername).thenReturn(user.getUsername());
 
-            when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
+            when(userRepository.findByUsername(user.getUsername())).thenReturn(Optional.of(user));
             when(todoListRepository.findById(list2.getId())).thenReturn(Optional.of(list2));
             when(userRepository.findByEmail(newMember.getEmail())).thenReturn(Optional.of(newMember));
             when(todoListRepository.save(any(TodoList.class))).thenAnswer(i -> i.getArguments()[0]);
@@ -275,9 +280,9 @@ class TodoListServiceTest {
     @Test
     void removeMember_shouldThrowAccessDeniedException_whenRequesterIsNotOwner() {
         try (MockedStatic<SecurityUtil> utilities = Mockito.mockStatic(SecurityUtil.class)) {
-            utilities.when(SecurityUtil::getAuthenticatedEmail).thenReturn(notOwner.getEmail());
+            utilities.when(SecurityUtil::getAuthenticatedUsername).thenReturn(notOwner.getUsername());
 
-            when(userRepository.findByEmail(notOwner.getEmail())).thenReturn(Optional.of(notOwner));
+            when(userRepository.findByUsername(notOwner.getUsername())).thenReturn(Optional.of(notOwner));
             when(todoListRepository.findById(list1.getId())).thenReturn(Optional.of(list1));
 
             AccessDeniedException exception = assertThrows(AccessDeniedException.class,
@@ -290,9 +295,9 @@ class TodoListServiceTest {
     @Test
     void removeMember_shouldThrowUserNotFoundException_whenMemberToRemoveNotFound() {
         try (MockedStatic<SecurityUtil> utilities = Mockito.mockStatic(SecurityUtil.class)) {
-            utilities.when(SecurityUtil::getAuthenticatedEmail).thenReturn(user.getEmail());
+            utilities.when(SecurityUtil::getAuthenticatedUsername).thenReturn(user.getUsername());
 
-            when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
+            when(userRepository.findByUsername(user.getUsername())).thenReturn(Optional.of(user));
             when(todoListRepository.findById(list1.getId())).thenReturn(Optional.of(list1));
             when(userRepository.findByEmail(newMember.getEmail())).thenReturn(Optional.empty());
 
@@ -308,9 +313,9 @@ class TodoListServiceTest {
         notMember.setEmail("notmember@example.com");
 
         try (MockedStatic<SecurityUtil> utilities = Mockito.mockStatic(SecurityUtil.class)) {
-            utilities.when(SecurityUtil::getAuthenticatedEmail).thenReturn(user.getEmail());
+            utilities.when(SecurityUtil::getAuthenticatedUsername).thenReturn(user.getUsername());
 
-            when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
+            when(userRepository.findByUsername(user.getUsername())).thenReturn(Optional.of(user));
             when(todoListRepository.findById(list1.getId())).thenReturn(Optional.of(list1));
             when(userRepository.findByEmail(notMember.getEmail())).thenReturn(Optional.of(notMember));
 
@@ -324,8 +329,9 @@ class TodoListServiceTest {
     @Test
     void removeMember_shouldThrowAccessDeniedException_whenTryingToRemoveOwner() {
         try (MockedStatic<SecurityUtil> utilities = Mockito.mockStatic(SecurityUtil.class)) {
-            utilities.when(SecurityUtil::getAuthenticatedEmail).thenReturn(user.getEmail());
+            utilities.when(SecurityUtil::getAuthenticatedUsername).thenReturn(user.getUsername());
 
+            when(userRepository.findByUsername(user.getUsername())).thenReturn(Optional.of(user));
             when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
             when(todoListRepository.findById(list1.getId())).thenReturn(Optional.of(list1));
 
@@ -339,9 +345,9 @@ class TodoListServiceTest {
     @Test
     void updateTitle_shouldUpdateTitle_whenRequesterIsOwner() {
         try (MockedStatic<SecurityUtil> utilities = Mockito.mockStatic(SecurityUtil.class)) {
-            utilities.when(SecurityUtil::getAuthenticatedEmail).thenReturn(user.getEmail());
+            utilities.when(SecurityUtil::getAuthenticatedUsername).thenReturn(user.getUsername());
 
-            when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
+            when(userRepository.findByUsername(user.getUsername())).thenReturn(Optional.of(user));
             when(todoListRepository.findById(list1.getId())).thenReturn(Optional.of(list1));
             when(todoListRepository.save(any(TodoList.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -358,9 +364,9 @@ class TodoListServiceTest {
     @Test
     void updateTitle_shouldThrowAccessDeniedException_whenRequesterIsNotOwner() {
         try (MockedStatic<SecurityUtil> utilities = Mockito.mockStatic(SecurityUtil.class)) {
-            utilities.when(SecurityUtil::getAuthenticatedEmail).thenReturn(newMember.getEmail());
+            utilities.when(SecurityUtil::getAuthenticatedUsername).thenReturn(newMember.getUsername());
 
-            when(userRepository.findByEmail(newMember.getEmail())).thenReturn(Optional.of(newMember));
+            when(userRepository.findByUsername(newMember.getUsername())).thenReturn(Optional.of(newMember));
             when(todoListRepository.findById(list2.getId())).thenReturn(Optional.of(list2));
 
             AccessDeniedException exception = assertThrows(AccessDeniedException.class,
@@ -373,9 +379,9 @@ class TodoListServiceTest {
     @Test
     void updateTitle_shouldThrowTodoListNotFoundException_whenListDoesNotExist() {
         try (MockedStatic<SecurityUtil> utilities = Mockito.mockStatic(SecurityUtil.class)) {
-            utilities.when(SecurityUtil::getAuthenticatedEmail).thenReturn(user.getEmail());
+            utilities.when(SecurityUtil::getAuthenticatedUsername).thenReturn(user.getUsername());
 
-            when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
+            when(userRepository.findByUsername(user.getUsername())).thenReturn(Optional.of(user));
             when(todoListRepository.findById(list1.getId())).thenReturn(Optional.empty());
 
             assertThrows(TodoListNotFoundException.class,
@@ -386,9 +392,9 @@ class TodoListServiceTest {
     @Test
     void deleteTodoList_shouldDelete_whenRequesterIsOwner() {
         try (MockedStatic<SecurityUtil> utilities = Mockito.mockStatic(SecurityUtil.class)) {
-            utilities.when(SecurityUtil::getAuthenticatedEmail).thenReturn(user.getEmail());
+            utilities.when(SecurityUtil::getAuthenticatedUsername).thenReturn(user.getUsername());
 
-            when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
+            when(userRepository.findByUsername(user.getUsername())).thenReturn(Optional.of(user));
             when(todoListRepository.findById(list1.getId())).thenReturn(Optional.of(list1));
 
             todoListService.deleteTodoList(list1.getId());
@@ -400,9 +406,9 @@ class TodoListServiceTest {
     @Test
     void deleteTodoList_shouldThrowAccessDeniedException_whenRequesterIsNotOwner() {
         try (MockedStatic<SecurityUtil> utilities = Mockito.mockStatic(SecurityUtil.class)) {
-            utilities.when(SecurityUtil::getAuthenticatedEmail).thenReturn(notOwner.getEmail());
+            utilities.when(SecurityUtil::getAuthenticatedUsername).thenReturn(notOwner.getUsername());
 
-            when(userRepository.findByEmail(notOwner.getEmail())).thenReturn(Optional.of(notOwner));
+            when(userRepository.findByUsername(notOwner.getUsername())).thenReturn(Optional.of(notOwner));
             when(todoListRepository.findById(list1.getId())).thenReturn(Optional.of(list1));
 
             AccessDeniedException exception = assertThrows(AccessDeniedException.class,
@@ -417,9 +423,9 @@ class TodoListServiceTest {
     @Test
     void deleteTodoList_shouldThrowTodoListNotFoundException_whenListDoesNotExist() {
         try (MockedStatic<SecurityUtil> utilities = Mockito.mockStatic(SecurityUtil.class)) {
-            utilities.when(SecurityUtil::getAuthenticatedEmail).thenReturn(user.getEmail());
+            utilities.when(SecurityUtil::getAuthenticatedUsername).thenReturn(user.getUsername());
 
-            when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
+            when(userRepository.findByUsername(user.getUsername())).thenReturn(Optional.of(user));
             when(todoListRepository.findById(list1.getId())).thenReturn(Optional.empty());
 
             assertThrows(TodoListNotFoundException.class,

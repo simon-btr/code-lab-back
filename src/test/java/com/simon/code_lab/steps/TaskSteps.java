@@ -45,19 +45,19 @@ public class TaskSteps {
     private TaskDto createdTask;
     private List<TaskDto> taskList;
 
-    @Given("a logged in user with the email {string}")
-    public void a_logged_in_user_with_the_email(String email) {
-        userRepository.save(new User("username_" + email, email, "password"));
+    @Given("a logged in user with the username {string}")
+    public void a_logged_in_user_with_the_username(String username) {
+        userRepository.save(new User(username, username + "@example.com", "password"));
         var authentication = new UsernamePasswordAuthenticationToken(
-                email,
+                username,
                 "password",
                 List.of(() -> "ROLE_USER"));
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 
-    @Given("another user exists with the email {string}")
-    public void another_user_exists_with_the_email(String email) {
-        userRepository.save(new User("username_" + email, email, "password"));
+    @Given("another user exists with the username {string}")
+    public void another_user_exists_with_the_username(String username) {
+        userRepository.save(new User(username, username + "@example.com", "password"));
     }
 
     @Given("they create a todo list with title {string}")
@@ -91,13 +91,13 @@ public class TaskSteps {
     }
 
     @Given("current user is switched to {string}")
-    public void current_user_is_switched_to(String email) {
+    public void current_user_is_switched_to(String username) {
         var authentication = new UsernamePasswordAuthenticationToken(
-                email,
+                username,
                 "password",
                 List.of(() -> "ROLE_USER"));
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        userRepository.save(new User("username_" + email, email, "password"));
+        userRepository.save(new User(username, username + "example.com", "password"));
     }
 
     @Then("the task list should contain a task titled {string}")

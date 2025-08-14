@@ -7,7 +7,7 @@ public final class SecurityUtil {
     private SecurityUtil() {
     }
 
-    public static String getAuthenticatedEmail() {
+    public static String getAuthenticatedUsername() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !auth.isAuthenticated()) {
             return null;

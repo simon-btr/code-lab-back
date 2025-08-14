@@ -36,35 +36,35 @@ public class TodoListSteps {
 
     private TodoListDto createdList;
     private TodoListDto updatedList;
-    private String currentUserEmail;
+    private String currentUsername;
     private Exception caughtException;
 
-    @Given("a logged in user with email {string}")
-    public void a_logged_in_user_with_email(String email) {
-        currentUserEmail = email;
+    @Given("a logged in user with username {string}")
+    public void a_logged_in_user_with_username(String username) {
+        currentUsername = username;
 
-        userRepository.save(new User("username", email, "password"));
+        userRepository.save(new User(username, username + "@example.com", "password"));
 
         var authentication = new UsernamePasswordAuthenticationToken(
-                email,
+                username,
                 "password",
                 List.of(() -> "ROLE_USER"));
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 
-    @Given("another user exists with email {string}")
-    public void another_user_exists_with_email(String email) {
-        userRepository.save(new User("username2", email, "test"));
+    @Given("another user exists with username {string}")
+    public void another_user_exists_with_username(String username) {
+        userRepository.save(new User(username, username + "@example.com", "password"));
     }
 
     @Given("the current user is switched to {string}")
-    public void the_current_user_is_switched_to(String email) {
-        var authentication = new UsernamePasswordAuthenticationToken(
-                email,
+    public void the_current_user_is_switched_to(String username) {
+                var authentication = new UsernamePasswordAuthenticationToken(
+                username,
                 "password",
                 List.of(() -> "ROLE_USER"));
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        currentUserEmail = email;
+        currentUsername = username;
     }
 
     @When("they create a todo list with the title {string}")
@@ -105,7 +105,7 @@ public class TodoListSteps {
         assertNotNull(createdList);
         assertEquals(title, createdList.getTitle());
         assertTrue(createdList.getMembers().stream()
-                .anyMatch(u -> u.getEmail().equals(currentUserEmail)));
+                .anyMatch(u -> u.getUsername().equals(currentUsername)));
     }
 
     @Then("the todo list {string} should include {string} as a member")

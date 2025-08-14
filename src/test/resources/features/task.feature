@@ -4,9 +4,9 @@ Feature: Task Management
   So that I can organize my work
 
   Background:
-    Given a logged in user with the email "owner@example.com"
+    Given a logged in user with the username "owner"
     And they create a todo list with title "Work"
-    And another user exists with the email "member@example.com"
+    And another user exists with the username "member"
     And they add user "member@example.com" to the todo list
 
   Scenario: Add a new task

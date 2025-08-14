@@ -59,7 +59,7 @@ public class AuthenticationService {
 
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                        loginUserDto.getEmail(),
+                        user.getUsername(),
                         loginUserDto.getPassword())
                         );
 

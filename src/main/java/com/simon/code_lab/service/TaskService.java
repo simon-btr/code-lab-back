@@ -3,6 +3,7 @@ package com.simon.code_lab.service;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -11,7 +12,6 @@ import com.simon.code_lab.dto.mapper.TodoListMapper;
 import com.simon.code_lab.exception.AccessDeniedException;
 import com.simon.code_lab.exception.TaskNotFoundException;
 import com.simon.code_lab.exception.TodoListNotFoundException;
-import com.simon.code_lab.exception.UserNotFoundException;
 import com.simon.code_lab.model.Task;
 import com.simon.code_lab.model.TodoList;
 import com.simon.code_lab.model.User;
@@ -30,9 +30,9 @@ public class TaskService {
     private final UserRepository userRepository;
 
     private User getCurrentUserOrThrow() {
-        String email = SecurityUtil.getAuthenticatedEmail();
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException(email));
+        String username = SecurityUtil.getAuthenticatedUsername();
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
     }
 
     private void ensureUserIsMember(TodoList list, User user) {

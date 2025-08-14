@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import com.simon.code_lab.dto.TodoListDto;
 import com.simon.code_lab.dto.mapper.TodoListMapper;
@@ -27,9 +28,9 @@ public class TodoListService {
     private final UserRepository userRepository;
 
     private User getCurrentUserOrThrow() {
-        String email = SecurityUtil.getAuthenticatedEmail();
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException(email));
+        String username = SecurityUtil.getAuthenticatedUsername();
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
     }
 
     private TodoList getListIfMember(Long listId, User user) {
