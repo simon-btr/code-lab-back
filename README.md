@@ -57,19 +57,19 @@ backend/
 ## ⚙️ Installation
 
 ### 1️⃣ Cloner le dépôt
-git clone https://github.com/simon-btr/code-lab-back
+git clone https://github.com/simon-btr/code-lab-back  
 cd code-lab-back
 
 ### 2️⃣ Configurer la base de données
 Dans src/main/resources/application.properties :
 
-spring.datasource.url=jdbc:postgresql://localhost:5432/
-spring.datasource.username=postgres
-spring.datasource.password=monmotdepasse
+spring.datasource.url=jdbc:postgresql://localhost:5432/  
+spring.datasource.username=postgres  
+spring.datasource.password=monmotdepasse  
 
 ### 3️⃣ Lancer le backend
-mvn spring-boot:run
-Le backend sera disponible sur :
+mvn spring-boot:run  
+Le backend sera disponible sur :  
 http://localhost:8080
 
 🧪 Lancer les tests
@@ -95,8 +95,8 @@ POST	/todolists/{id}/tasks	        Ajouter une tâche
 PUT	/tasks/{id}                         Mettre à jour une tâche  
 DELETE	/tasks/{id}	                    Supprimer une tâche  
 
-📄 Licence
-Ce projet est sous licence MIT.
+📄 Licence  
+Ce projet est sous licence MIT.  
 Vous êtes libre de l'utiliser, le modifier et le redistribuer à des fins personnelles ou professionnelles, avec attribution.
 
 💡 Ce backend a été conçu dans un cadre de démonstration et de portfolio.
