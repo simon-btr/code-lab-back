@@ -38,19 +38,19 @@ Les utilisateurs peuvent créer des listes, y ajouter des tâches, inviter d'aut
 
 ## 📂 Structure du projet
 
-backend/
-│── src/main/java/com/simon/code_lab/
-│ ├── config/ # Configurations (sécurité, CORS, JWT, etc.)
-│ ├── controller/ # Endpoints REST
-│ ├── dto/ # Objets de transfert de données
-│ ├── exception # Les erreurs levées
-│ ├── model/ # Entités JPA
-│ ├── repository/ # DAO (accès DB)
-│ ├── response/ # Reponse de connexion
-│ ├── service/ # Logique métier
-│ ├── util/ # JWT et filtres de sécurité
-│── src/test/java/... # Tests unitaires et BDD (Cucumber)
-│── pom.xml
+backend/  
+│── src/main/java/com/simon/code_lab/  
+│ ├── config/ # Configurations (sécurité, CORS, JWT, etc.)  
+│ ├── controller/ # Endpoints REST  
+│ ├── dto/ # Objets de transfert de données  
+│ ├── exception # Les erreurs levées  
+│ ├── model/ # Entités JPA  
+│ ├── repository/ # DAO (accès DB)  
+│ ├── response/ # Reponse de connexion  
+│ ├── service/ # Logique métier  
+│ ├── util/ # JWT et filtres de sécurité  
+│── src/test/java/... # Tests unitaires et BDD (Cucumber)  
+│── pom.xml  
 
 ---
 
@@ -59,14 +59,15 @@ backend/
 ### 1️⃣ Cloner le dépôt
 git clone https://github.com/simon-btr/code-lab-back
 cd code-lab-back
-2️⃣ Configurer la base de données
+
+### 2️⃣ Configurer la base de données
 Dans src/main/resources/application.properties :
 
 spring.datasource.url=jdbc:postgresql://localhost:5432/
 spring.datasource.username=postgres
 spring.datasource.password=monmotdepasse
 
-3️⃣ Lancer le backend
+### 3️⃣ Lancer le backend
 mvn spring-boot:run
 Le backend sera disponible sur :
 http://localhost:8080
