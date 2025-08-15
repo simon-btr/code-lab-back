@@ -74,26 +74,26 @@ http://localhost:8080
 
 🧪 Lancer les tests
 
-mvn test
+mvn test  
 Les tests incluent :
 
 Tests unitaires (JUnit)
 
 Tests BDD avec Cucumber
 
-📡 API Principales
-Méthode	Endpoint	Description
-POST	/auth/signup	Créer un compte utilisateur
-POST	/auth/login	Se connecter (JWT)
-GET	/todolists	Lister les listes de l'utilisateur
-POST	/todolists	Créer une liste
-PUT	/todolists/{id}	Modifier le titre d'une liste
-DELETE	/todolists/{id}	Supprimer une liste
-POST	/todolists/{id}/members	Ajouter un membre
-DELETE	/todolists/{id}/members/{email}	Supprimer un membre
-POST	/todolists/{id}/tasks	Ajouter une tâche
-PUT	/tasks/{id} Mettre à jour une tâche
-DELETE	/tasks/{id}	Supprimer une tâche
+📡 API Principales  
+Méthode	Endpoint  
+POST	/auth/signup	                Créer un compte utilisateur  
+POST	/auth/login	                    Se connecter (JWT)  
+GET	/todolists	                        Lister les listes de l'utilisateur  
+POST	/todolists	                    Créer une liste  
+PUT	/todolists/{id}	                    Modifier le titre d'une liste  
+DELETE	/todolists/{id}	                Supprimer une liste  
+POST	/todolists/{id}/members	        Ajouter un membre  
+DELETE	/todolists/{id}/members/{email}	Supprimer un membre  
+POST	/todolists/{id}/tasks	        Ajouter une tâche  
+PUT	/tasks/{id}                         Mettre à jour une tâche  
+DELETE	/tasks/{id}	                    Supprimer une tâche  
 
 📄 Licence
 Ce projet est sous licence MIT.
